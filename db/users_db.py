@@ -40,6 +40,7 @@ class Users:
                 (mail, name, surname, password_hash, is_deleted, data_json)
             )
             user_id = self.db.cursor.fetchone()["id"]
+            print("Register", user_id)
             self.db.conn.commit()
             logger.info(f"The user has been created: {user_id} ({name})")
             return user_id

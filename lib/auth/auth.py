@@ -22,7 +22,7 @@ class Auth:
             raise HTTPException(400, detail="User already exists")
         password_hash = hash_password(password)
         user_id = self.db.create_user(mail, name, surname, password_hash)
-        if not user_id:
+        if user_id is None:
             raise HTTPException(500, detail="Failed to create user")
         return user_id, None
 

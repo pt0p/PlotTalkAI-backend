@@ -48,6 +48,7 @@ class Users:
             logger.error(f"Error when creating user {name}: {e}")
             print(f"Error when creating user {mail} ({name}): {e}", end="\n\n======\n\n")
             self.db.conn.rollback()
+            return None
 
     def get_user_by_mail(self, mail: EmailStr):
         try:
@@ -61,6 +62,7 @@ class Users:
         except Exception as e:
             logger.error(f"Error when receiving user by mail {mail}: {e}")
             print(f"Error when receiving user by mail {mail}: {e}", end="\n\n======\n\n")
+            return None
 
     def get_user_by_id(self, user_id: int):
         try:
@@ -74,6 +76,7 @@ class Users:
         except Exception as e:
             logger.error(f"Error when receiving user by id {user_id}: {e}")
             print(f"Error when receiving user by id {user_id}: {e}", end="\n\n======\n\n")
+            return None
 
     def get_user_data(self, user_id: int):
         try:
@@ -81,10 +84,11 @@ class Users:
             row = self.db.cursor.fetchone()
             logger.info(f"Received data for user {user_id}")
             print(f"Received data for user: {user_id}", row.get("data") if row else None, sep = "\n", end="\n\n======\n\n")
-            return row.get("data")   if row else None
+            return row.get("data") if row else None
         except Exception as e:
             logger.error(f"Error when receiving data for user {user_id}: {e}")
             print(f"Error when receiving data for user {user_id}: {e}", end="\n\n======\n\n")
+            return None
 
     def update_user_data(self, user_id: int, new_data: dict):
         try:
@@ -116,6 +120,7 @@ class Users:
             logger.error(f"Error updating user name {user_id}: {e}")
             print(f"Error updating name for user {user_id}: {e}", end="\n\n======\n\n")
             self.db.conn.rollback()
+            return False
 
     def update_user_password(self, user_id: int, new_pass: str):
         try:
@@ -131,6 +136,7 @@ class Users:
             logger.error(f"Error updating password for user {user_id}: {e}")
             print(f"Error updating password for user {user_id}: {e}", end="\n\n======\n\n")
             self.db.conn.rollback()
+            return False
 
     def delete_user(self, user_id: int):
         try:
@@ -180,3 +186,4 @@ class Users:
             logger.error(f"Error reactivating user {name}: {e}")
             print(f"Error reactivating user {mail} ({name}): {e}", end="\n\n======\n\n")
             self.db.conn.rollback()
+            return None

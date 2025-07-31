@@ -234,10 +234,13 @@ def generate(params: Params, user_id: int = Depends(get_current_user_id)):
     scene_id = params.scene_id
     script_id = params.script_id
     if script_id is None:
+        print("script_id должен быть передан в params или я в чем-то ошибся, анлак", end="\n\n======\n\n")
         raise HTTPException(status_code=400, detail="script_id должен быть передан в params или я в чем-то ошибся, анлак")
     if game_id is None:
+        print("game_id должен быть передан в params или я в чем-то ошибся, анлак", end="\n\n======\n\n")
         raise HTTPException(status_code=400, detail="game_id должен быть передан в params или я в чем-то ошибся, анлак")
     if scene_id is None:
+        print("scene_id должен быть передан в params или я в чем-то ошибся, анлак", end="\n\n======\n\n")
         raise HTTPException(status_code=400, detail="scene_id должен быть передан в params или я в чем-то ошибся, анлак")
     # Поиск по структуре
     # for game in user_data.get("games", []):
@@ -271,6 +274,7 @@ def generate(params: Params, user_id: int = Depends(get_current_user_id)):
                             found = 1
                             break
                     if not found:
+                        print("script_id не валидный", end="\n\n======\n\n")
                         raise HTTPException(status_code=400, detail="script_id не валидный")
                     break
             break

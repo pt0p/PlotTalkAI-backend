@@ -40,12 +40,13 @@ class Users:
                 (mail, name, surname, password_hash, is_deleted, data_json)
             )
             user_id = self.db.cursor.fetchone()["id"]
-            print("Register", user_id)
+            print(f"The user has been created: {user_id} ({mail}, {name})", end="\n\n======\n\n")
             self.db.conn.commit()
             logger.info(f"The user has been created: {user_id} ({name})")
             return user_id
         except Exception as e:
             logger.error(f"Error when creating user {name}: {e}")
+            print(f"Error when creating user {mail} ({name}): {e}", end="\n\n======\n\n")
             self.db.conn.rollback()
 
     def get_user_by_mail(self, mail: EmailStr):
@@ -53,31 +54,37 @@ class Users:
             self.db.cursor.execute("SELECT * FROM users_data WHERE mail = %s;", (mail,))
             user = self.db.cursor.fetchone()
             logger.info(f"Received user by mail: {mail}")
+            print(f"Received user by mail: {mail}", user, sep = "\n", end="\n\n======\n\n")
             if not user or user.get('is_deleted'):
                 return None
             return user
         except Exception as e:
             logger.error(f"Error when receiving user by mail {mail}: {e}")
+            print(f"Error when receiving user by mail {mail}: {e}", end="\n\n======\n\n")
 
     def get_user_by_id(self, user_id: int):
         try:
             self.db.cursor.execute("SELECT * FROM users_data WHERE id = %s;", (user_id,))
             user = self.db.cursor.fetchone()
             logger.info(f"Received user by id: {user_id}")
+            print(f"Received user by id: {user_id}", user, sep = "\n", end="\n\n======\n\n")
             if not user or user.get('is_deleted'):
                 return None
             return user
         except Exception as e:
             logger.error(f"Error when receiving user by id {user_id}: {e}")
+            print(f"Error when receiving user by id {user_id}: {e}", end="\n\n======\n\n")
 
     def get_user_data(self, user_id: int):
         try:
             self.db.cursor.execute("SELECT data FROM users_data WHERE id = %s;", (user_id,))
             row = self.db.cursor.fetchone()
             logger.info(f"Received data for user {user_id}")
-            return row["data"] if row else None
+            print(f"Received data for user: {user_id}", row.get("data") if row else None, sep = "\n", end="\n\n======\n\n")
+            return row.get("data")   if row else None
         except Exception as e:
             logger.error(f"Error when receiving data for user {user_id}: {e}")
+            print(f"Error when receiving data for user {user_id}: {e}", end="\n\n======\n\n")
 
     def update_user_data(self, user_id: int, new_data: dict):
         try:
@@ -87,9 +94,11 @@ class Users:
             )
             self.db.conn.commit()
             logger.info(f"Updated data for user {user_id}")
+            print(f"Updated data for user: {user_id}", new_data, sep = "\n", end="\n\n======\n\n")
             return True
         except Exception as e:
             logger.error(f"Error updating data for user {user_id}: {e}")
+            print(f"Error updating data for user {user_id}: {e}", end="\n\n======\n\n")
             self.db.conn.rollback()
             return False 
 
@@ -101,9 +110,11 @@ class Users:
             )
             self.db.conn.commit()
             logger.info(f"User name {user_id} updated ")
+            print(f"Updated name for user: {user_id}", new_name, sep = "\n", end="\n\n======\n\n")
             return True
         except Exception as e:
             logger.error(f"Error updating user name {user_id}: {e}")
+            print(f"Error updating name for user {user_id}: {e}", end="\n\n======\n\n")
             self.db.conn.rollback()
 
     def update_user_password(self, user_id: int, new_pass: str):
@@ -114,9 +125,11 @@ class Users:
             )
             self.db.conn.commit()
             logger.info(f"Password updated for user {user_id}")
+            print(f"Updated password for user: {user_id}", new_pass, sep = "\n", end="\n\n======\n\n")
             return True
         except Exception as e:
             logger.error(f"Error updating password for user {user_id}: {e}")
+            print(f"Error updating password for user {user_id}: {e}", end="\n\n======\n\n")
             self.db.conn.rollback()
 
     def delete_user(self, user_id: int):
@@ -125,9 +138,11 @@ class Users:
                 (True, user_id))
             self.db.conn.commit()
             logger.info(f"User {user_id} deleted")
+            print(f"User {user_id} deleted", end="\n\n======\n\n")
             return True
         except Exception as e:
             logger.error(f"Error deleting user {user_id}: {e}")
+            print(f"Error deleting user {user_id}: {e}", end="\n\n======\n\n")
             self.db.conn.rollback()
 
     def reactivate_user(self, mail, name, surname, password_hash, data=None):
@@ -159,7 +174,9 @@ class Users:
             user_id = self.db.cursor.fetchone()["id"]
             self.db.conn.commit()
             logger.info(f"User reactivated: {user_id} ({name})")
+            print(f"User {mail} ({name}) reactivated", end="\n\n======\n\n")
             return user_id
         except Exception as e:
             logger.error(f"Error reactivating user {name}: {e}")
+            print(f"Error reactivating user {mail} ({name}): {e}", end="\n\n======\n\n")
             self.db.conn.rollback()

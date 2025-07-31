@@ -33,7 +33,6 @@ def get_user_by_id(user_id: int = Depends(get_current_user_id)):
 @router.get("/users/me/data", tags=["Users"])
 def get_user_data(user_id: int = Depends(get_current_user_id)):
     user = user_service.get_user_by_id(user_id)
-    print(user_id, user)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     data = user_service.get_user_data(user_id)
@@ -43,7 +42,7 @@ def get_user_data(user_id: int = Depends(get_current_user_id)):
 
 @router.post("/users/me/upd/data", tags=["Users"])
 def update_user_data(new_data: UserUpdateData, user_id: int = Depends(get_current_user_id)):
-    print(321)
+    print(f"Updating data for user: {user_id}", new_data, sep = "...\n", end="\n\n======\n\n")
     user_data = user_service.get_user_data(user_id)
     for game_index in range(len(new_data.data.get("games", []))):
         game = new_data.data["games"][game_index]

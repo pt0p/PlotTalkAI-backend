@@ -31,7 +31,7 @@ def generate(params: Params, user_id: int = Depends(get_current_user_id)):
             "info": "Стас показывает волшебный ластик и предлагает Ивану испытать его, стерев что-нибудь в классе.",
             "type": "C",
             "mood": "воодушевлённый",
-            "goal_achieved": {
+            "g  oal_achieved": {
                 "item": -1,
                 "info": -1
             },
@@ -214,7 +214,7 @@ def generate(params: Params, user_id: int = Depends(get_current_user_id)):
             "line": "Эх... Похоже, ты прав. Наверное, этот ластик просто хорошо стирает бумагу, а всё остальное — просто выдумки. Жаль, я так надеялся, что он поможет разгадать тайны нашей школы... Ладно, не будем больше тратить время. Спасибо, что хотя бы попробовал со мной разобраться. Может, когда-нибудь мы всё же найдём что-то по-настоящему волшебное... А пока пойду, попробую стереть хотя бы эту задачку в учебнике — хоть какая-то польза. До встречи!"
         }
     ]
-}
+    }
     time.sleep(30)
     # a = {"x": 1}
     # time.sleep(5)
@@ -222,7 +222,7 @@ def generate(params: Params, user_id: int = Depends(get_current_user_id)):
     #     a_dict = json.loads(a)
     # except Exception:
     #     raise HTTPException(status_code=500, detail="Failed to parse generated dialogue")
-
+    print(f"Generated  script for user: {user_id}", a, sep = "\n", end="\n\n======\n\n")
     user_data = user_service.get_user_data(user_id)
     if not user_data:
         raise HTTPException(status_code=404, detail="User data not found")

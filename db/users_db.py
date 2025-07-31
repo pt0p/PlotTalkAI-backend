@@ -27,27 +27,27 @@ class Users:
                 }
             }
         try:
-            if not isinstance(data, str):
-                data_json = json.dumps(data)
-            else:
-                data_json = data
-            self.db.cursor.execute(
-                """
-                INSERT INTO users_data (mail, name, surname, password_hash, is_deleted, data)
-                VALUES (%s, %s, %s, %s, %s, %s)
-                RETURNING id;
-                """,
-                (mail, name, surname, password_hash, is_deleted, data_json)
-            )
-            user_id = self.db.cursor.fetchone()["id"]
-            print(f"The user has been created: {user_id} ({mail}, {name})", end="\n\n======\n\n")
-            self.db.conn.commit()
-            logger.info(f"The user has been created: {user_id} ({name})")
-            return user_id
+            with self.db.cursor as curs:
+                if not isinstance(data, str):
+                    data_json = json.dumps(data)
+                else:
+                    data_json = data
+                curs.execute(
+                    """
+                    INSERT INTO users_data (mail, name, surname, password_hash, is_deleted, data)
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                    RETURNING id;
+                    """,
+                    (mail, name, surname, password_hash, is_deleted, data_json)
+                )
+                user_id = curs.fetchone()["id"]
+                print(f"The user has been created: {user_id} ({mail}, {name})", end="\n\n======\n\n")
+                self.db.conn.commit()
+                logger.info(f"The user has been created: {user_id} ({name})")
+                return user_id
         except Exception as e:
             logger.error(f"Error when creating user {name}: {e}")
             print(f"Error when creating user {mail} ({name}): {e}", end="\n\n======\n\n")
-            self.db.conn.rollback()
             return None
 
     def get_user_by_mail(self, mail: EmailStr):

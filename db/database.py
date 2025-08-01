@@ -21,7 +21,7 @@ class DatabasePool:
     _pool = None
 
     @classmethod
-    def init_pool(cls, min_conn, max_conn):
+    def init_pool(cls):
         cls.dburl = os.getenv('DATABASE_URL')
         cls.dbname = os.getenv('DB_NAME')
         cls.user = os.getenv('DB_USER')
@@ -30,10 +30,13 @@ class DatabasePool:
         cls.port = int(os.getenv('DB_PORT'))
         cls.min_conn = int(os.getenv('MIN_CONN'))
         cls.max_conn = int(os.getenv('MAX_CONN'))
+        cls.connect_pool()
+    
+    def connect_pool(cls):
         try:
             cls._pool = ThreadedConnectionPool(
-                minconn=min_conn,
-                maxconn=max_conn,
+                minconn=cls.min_conn,
+                maxconn=cls.max_conn,
                 dsn=cls.dburl,
                 sslmode="require"
             )
@@ -41,6 +44,11 @@ class DatabasePool:
         except Exception as e:
             logging.error(f"Error connecting to the database: {e}")
             raise
+
+    @classmethod
+    def check_pool(cls):
+        if not cls._pool:
+            cls.connect_pool()
 
     @classmethod
     def get_connection(cls):

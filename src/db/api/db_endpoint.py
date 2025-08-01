@@ -1,14 +1,15 @@
 from fastapi import APIRouter, HTTPException, Depends, Request, Header
 
-from db.database import Database
 from db.users_db import Users
 from lib.models.schemas import *
 from lib.auth.utils import decode_token
+from psycopg2.extensions import Connection
+from db.database import DatabasePool
 
 router = APIRouter()
-db = Database()
-user_service = Users(db)
 
+def get_users_service(db_conn: Connection = Depends(DatabasePool.get_connection())):
+    return Users(db_conn) 
 
 def get_current_user_id(authorization: str = Header(...)):
     if not authorization or not authorization.startswith("Bearer "):
@@ -24,26 +25,33 @@ def get_current_user_id(authorization: str = Header(...)):
         raise HTTPException(status_code=401, detail="Invalid token")
 
 @router.get("/users/me", tags=["Users"])
-def get_user_by_id(user_id: int = Depends(get_current_user_id)):
-    user = user_service.get_user_by_id(user_id)
+def get_user_by_id(user_id: int = Depends(get_current_user_id), users_service: Users = Depends(get_users_service)):
+    user = users_service.get_user_by_id(user_id)
+    DatabasePool.put_connection(users_service.db_conn)
     if user:
         return user
     raise HTTPException(status_code=404, detail="User not found")
 
 @router.get("/users/me/data", tags=["Users"])
-def get_user_data(user_id: int = Depends(get_current_user_id)):
-    user = user_service.get_user_by_id(user_id)
+def get_user_data(user_id: int = Depends(get_current_user_id), users_service: Users = Depends(get_users_service)):
+    user = users_service.get_user_by_id(user_id)
     if not user:
+        DatabasePool.put_connection(users_service.db_conn)
         raise HTTPException(status_code=404, detail="User not found")
-    data = user_service.get_user_data(user_id)
+    data = users_service.get_user_data(user_id)
+    DatabasePool.put_connection(users_service.db_conn)
     if data:
         return {"data": data}
     raise HTTPException(status_code=404, detail="User data not found")
 
 @router.post("/users/me/upd/data", tags=["Users"])
-def update_user_data(new_data: UserUpdateData, user_id: int = Depends(get_current_user_id)):
+def update_user_data(new_data: UserUpdateData, user_id: int = Depends(get_current_user_id), users_service: Users = Depends(get_users_service)):
     print(f"Updating data for user: {user_id}", new_data, sep = "...\n", end="\n\n======\n\n")
-    user_data = user_service.get_user_data(user_id)
+    user = users_service.get_user_by_id(user_id)
+    if not user:
+        DatabasePool.put_connection(users_service.db_conn)
+        raise HTTPException(status_code=404, detail="User not found")
+    user_data = users_service.get_user_data(user_id)
     for game_index in range(len(new_data.data.get("games", []))):
         game = new_data.data["games"][game_index]
         for scene_index in range(len(game.get("scenes", []))):
@@ -54,40 +62,44 @@ def update_user_data(new_data: UserUpdateData, user_id: int = Depends(get_curren
                 except Exception:
                     pass
 
-    user = user_service.get_user_by_id(user_id)
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    success = user_service.update_user_data(user_id, new_data.data)
+    success = users_service.update_user_data(user_id, new_data.data)
+    DatabasePool.put_connection(users_service.db_conn)
     if success:
         return {"message": "User data updated successfully"}
     raise HTTPException(status_code=400, detail="Failed to update data")
 
 @router.put("/users/me/name", tags=["Users"])
-def update_user_name(new_name: UserUpdateName, user_id: int = Depends(get_current_user_id)):
-    user = user_service.get_user_by_id(user_id)
+def update_user_name(new_name: UserUpdateName, user_id: int = Depends(get_current_user_id), users_service: Users = Depends(get_users_service)):
+    user = users_service.get_user_by_id(user_id)
     if not user:
+        DatabasePool.put_connection(users_service.db_conn)
         raise HTTPException(status_code=404, detail="User not found")
-    success = user_service.update_user_name(user_id, new_name.name, new_name.surname)
+    success = users_service.update_user_name(user_id, new_name.name, new_name.surname)
+    DatabasePool.put_connection(users_service.db_conn)
     if success:
         return {"message": "User name updated successfully"}
     raise HTTPException(status_code=400, detail="Failed to update name")
 
 @router.put("/users/me/password", tags=["Users"])
-def update_user_password(new_pass: UserUpdatePassword, user_id: int = Depends(get_current_user_id)):
-    user = user_service.get_user_by_id(user_id)
+def update_user_password(new_pass: UserUpdatePassword, user_id: int = Depends(get_current_user_id), users_service: Users = Depends(get_users_service)):
+    user = users_service.get_user_by_id(user_id)
     if not user:
+        DatabasePool.put_connection(users_service.db_conn)
         raise HTTPException(status_code=404, detail="User not found")
-    success = user_service.update_user_password(user_id, new_pass.password_hash)
+    success = users_service.update_user_password(user_id, new_pass.password_hash)
+    DatabasePool.put_connection(users_service.db_conn)
     if success:
         return {"message": "Password updated successfully"}
     raise HTTPException(status_code=400, detail="Failed to update password")
 
 @router.delete("/users/me", tags=["Users"])
-def delete_user(user_id: int = Depends(get_current_user_id)):
-    user = user_service.get_user_by_id(user_id)
+def delete_user(user_id: int = Depends(get_current_user_id), users_service: Users = Depends(get_users_service)):
+    user = users_service.get_user_by_id(user_id)
     if not user:
+        DatabasePool.put_connection(users_service.db_conn)
         raise HTTPException(status_code=404, detail="User not found")
-    success = user_service.delete_user(user_id)
+    success = users_service.delete_user(user_id)
+    DatabasePool.put_connection(users_service.db_conn)
     if success:
         return {"message": "User deleted successfully"}
     raise HTTPException(status_code=400, detail="Failed to delete user")

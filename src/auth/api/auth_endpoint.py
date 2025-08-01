@@ -21,11 +21,15 @@ def register(user: UserRegisterRequest, auth_service: Auth = Depends(get_auth_se
         raise HTTPException(status_code=500, detail=error)
     if error:
         raise HTTPException(status_code=422, detail=error)
+    DatabasePool.put_connection(auth_service.db_conn)
     return UserResponse(id=user_id, mail=user.mail, name=user.name, surname=user.surname)
+    
 
 @router.post("/login", tags=["Auth"])
 def login(user: UserLoginRequest, auth_service: Auth = Depends(get_auth_service)):
-    return auth_service.login(user.mail, user.password)
+    login_res = auth_service.login(user.mail, user.password)
+    DatabasePool.put_connection(auth_service.db_conn)
+    return login_res
 
 @router.get("/protected", tags=["Auth"])
 def protected(authorization: Optional[str] = Header(None)):

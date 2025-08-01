@@ -47,11 +47,10 @@ def get_user_data(user_id: int = Depends(get_current_user_id), users_service: Us
 @router.post("/users/me/upd/data", tags=["Users"])
 def update_user_data(new_data: UserUpdateData, user_id: int = Depends(get_current_user_id), users_service: Users = Depends(get_users_service)):
     print(f"Updating data for user: {user_id}", new_data, sep = "...\n", end="\n\n======\n\n")
-    user = users_service.get_user_by_id(user_id)
-    if not user:
-        DatabasePool.put_connection(users_service.db_conn)
-        raise HTTPException(status_code=404, detail="User not found")
     user_data = users_service.get_user_data(user_id)
+    if not user_data:
+        DatabasePool.put_connection(users_service.db_conn)
+        raise HTTPException(status_code=404, detail="User data not found")
     for game_index in range(len(new_data.data.get("games", []))):
         game = new_data.data["games"][game_index]
         for scene_index in range(len(game.get("scenes", []))):

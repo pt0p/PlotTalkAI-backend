@@ -1,14 +1,19 @@
 from fastapi import APIRouter, HTTPException, Depends, Header
 from lib.auth.auth import Auth
 from lib.models.schemas import UserRegisterRequest, UserLoginRequest, UserResponse
+from db.database import DatabasePool
 from typing import Optional
 from lib.auth.utils import decode_token
+from psycopg2.extensions import Connection
+
 router = APIRouter()
 
-auth_service = Auth()
+
+def get_auth_service(db_conn: Connection = Depends(DatabasePool.get_connection())):
+    return Auth(db_conn) 
 
 @router.post("/register", tags=["Auth"])
-def register(user: UserRegisterRequest):
+def register(user: UserRegisterRequest, auth_service: Auth = Depends(get_auth_service)):
     user_id, error = auth_service.register(user.mail, user.name, user.surname, user.password)
     if error == "User already exists":
         raise HTTPException(status_code=400, detail=error)
@@ -19,7 +24,7 @@ def register(user: UserRegisterRequest):
     return UserResponse(id=user_id, mail=user.mail, name=user.name, surname=user.surname)
 
 @router.post("/login", tags=["Auth"])
-def login(user: UserLoginRequest):
+def login(user: UserLoginRequest, auth_service: Auth = Depends(get_auth_service)):
     return auth_service.login(user.mail, user.password)
 
 @router.get("/protected", tags=["Auth"])

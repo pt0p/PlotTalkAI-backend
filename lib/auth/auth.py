@@ -2,15 +2,15 @@ import os
 from datetime import datetime, timedelta
 from lib.auth.utils import hash_password, verify_password, create_access_token
 from lib.models.schemas import UserResponse
-from db.database import Database
+from db.database import DatabasePool
 from db.users_db import Users
 from fastapi import HTTPException
 
 class Auth:
-    def __init__(self):
-        self.db = Database()
-        self.db_oper = Users(self.db)
-
+    def __init__(self, db_conn):
+        self.db_conn = db_conn
+        self.db_oper = Users(db_conn)
+        
     def register(self, mail, name, surname, password):
         user = self.db_oper.get_user_by_mail(mail)
         if user:

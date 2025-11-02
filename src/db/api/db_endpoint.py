@@ -3,7 +3,7 @@ from fastapi import APIRouter, HTTPException, Depends, Request, Header
 from db.users_db import Users
 from lib.models.schemas import *
 from lib.auth.utils import decode_token
-from psycopg2.extensions import Connection
+from psycopg2.extensions import connection as Connection
 from db.database import DatabasePool
 
 router = APIRouter()

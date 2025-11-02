@@ -4,7 +4,7 @@ from lib.llm.generator import Orchestrator
 from db.database import DatabasePool
 from db.users_db import Users
 from src.db.api.db_endpoint import get_current_user_id
-from psycopg2.extensions import Connection
+from psycopg2.extensions import connection as Connection
 import json 
 import time
 router = APIRouter()

@@ -4,7 +4,7 @@ from lib.models.schemas import UserRegisterRequest, UserLoginRequest, UserRespon
 from db.database import DatabasePool
 from typing import Optional
 from lib.auth.utils import decode_token
-from psycopg2.extensions import Connection
+from psycopg2.extensions import connection as Connection
 
 router = APIRouter()
 

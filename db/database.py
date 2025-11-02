@@ -31,7 +31,8 @@ class DatabasePool:
         cls.min_conn = int(os.getenv('MIN_CONN'))
         cls.max_conn = int(os.getenv('MAX_CONN'))
         cls.connect_pool()
-    
+
+    @classmethod
     def connect_pool(cls):
         try:
             cls._pool = ThreadedConnectionPool(
